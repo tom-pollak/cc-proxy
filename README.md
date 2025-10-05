@@ -4,13 +4,19 @@ Use any AI model with Claude Code.
 
 ## What is this?
 
-Claude Chameleon is a proxy that translates Claude Code requests to any AI model. Uses OpenRouter by default.
+Chameleon Code is a proxy that translates Claude Code requests to any AI model. Uses OpenRouter by default.
 
 ## Quick Start
 
 ```bash
 uv tool install chameleon-code
 CHAM_API_KEY="<YOUR_OPENROUTER_API_KEY>" cham
+```
+
+Or run standalone (it's single Python file, requires `uv`):
+
+```bash
+./cham.py
 ```
 
 ## Options
