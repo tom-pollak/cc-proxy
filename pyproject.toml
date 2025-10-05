@@ -1,6 +1,6 @@
 [project]
 name = "chameleon-code"
-version = "0.1.0"
+version = "0.1.1"
 description = "Chameleon Code - Use any AI model with Claude Code"
 readme = "README.md"
 authors = [{ name = "Tom Pollak", email = "tompollak1000@gmail.com" }]
