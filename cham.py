@@ -25,8 +25,6 @@ from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
 
-logger = logging.getLogger("uvicorn.error")
-
 
 class ToolCall(BaseModel):
     type: Literal["tool_use"]
@@ -165,6 +163,7 @@ class MessageResponse(BaseModel):
 def mk_app(max_tokens: int | None, url: str, api_key: str) -> FastAPI:
     app = FastAPI()
     client = OpenAI(base_url=url, api_key=api_key)
+    logger = logging.getLogger("uvicorn.error")
 
     @app.post("/v1/messages")
     async def messages(request: MessageRequest) -> MessageResponse:
@@ -195,9 +194,9 @@ def main():
     parser.add_argument("--api-key", default=os.getenv("CHAM_API_KEY"), help="API key (or set CHAM_API_KEY env var)")
     parser.add_argument("--server", action="store_true", help="Run server only, connect externally")
     parser.add_argument("--port", type=int, default=8654, help="Port to bind to")
+
     args = parser.parse_args()
     small_model = args.small_model or args.model
-
     if not args.api_key:
         parser.error("--api-key is required (or set CHAM_API_KEY environment variable)")
 
