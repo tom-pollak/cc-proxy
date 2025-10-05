@@ -98,10 +98,10 @@ class MessageRequest(BaseModel):
     tools: list[ToolSpec] | None = None
     tool_choice: str | dict[str, str] | None = "auto"
 
-    def to_openai(self, model: str, max_tokens: int | None) -> dict:
+    def to_openai(self, max_tokens: int | None) -> dict:
         msgs = [m for msg in self.messages for m in msg.to_openai()]
         out = {
-            "model": model,
+            "model": self.model,
             "messages": msgs,
             "temperature": self.temperature,
             "max_tokens": max_tokens or self.max_tokens,
@@ -162,23 +162,23 @@ class MessageResponse(BaseModel):
 # ███████████████████████████████████  Server  ███████████████████████████████████
 
 
-def mk_app(model: str, max_tokens: int | None, url: str, api_key: str) -> FastAPI:
+def mk_app(max_tokens: int | None, url: str, api_key: str) -> FastAPI:
     app = FastAPI()
     client = OpenAI(base_url=url, api_key=api_key)
 
     @app.post("/v1/messages")
     async def messages(request: MessageRequest) -> MessageResponse:
-        payload = request.to_openai(model, max_tokens)
+        payload = request.to_openai(max_tokens)
         try:
             completion = client.chat.completions.create(**payload)
         except Exception as e:
-            logger.error(f"Error calling {model}: {e}")
+            logger.error(f"Error calling {request.model}: {e}")
             raise HTTPException(status_code=500, detail=str(e))
         return MessageResponse.from_completion(completion)
 
     @app.get("/health")
     def health():
-        return {"status": "healthy", "model": model}
+        return {"status": "healthy"}
 
     return app
 
@@ -186,20 +186,32 @@ def mk_app(model: str, max_tokens: int | None, url: str, api_key: str) -> FastAP
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Claude Code Proxy")
     parser.add_argument("--model", "-m", default="deepseek/deepseek-chat-v3.1:free", help="Model to use")
+    parser.add_argument("--small-model", help="Small model for haiku/subagent tasks (defaults to --model)")
     parser.add_argument("--max-tokens", type=int)
     parser.add_argument("--url", default="https://openrouter.ai/api/v1", help="URL to route to")
     parser.add_argument("--api-key", default=os.getenv("CC_TOKEN"), help="API key (or set CC_TOKEN env var)")
     parser.add_argument("--server", action="store_true", help="Run server only")
     parser.add_argument("--port", type=int, default=8654, help="Port to bind to")
     args = parser.parse_args()
+    small_model = args.small_model or args.model
 
     if not args.api_key:
         parser.error("--api-key is required (or set CC_TOKEN environment variable)")
 
-    app = mk_app(args.model, args.max_tokens, args.url, args.api_key)
+    app = mk_app(args.max_tokens, args.url, args.api_key)
+
+    anthropic_env = {
+        "ANTHROPIC_BASE_URL": f"http://localhost:{args.port}/",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": args.model,
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": args.model,
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": small_model,
+        "CLAUDE_CODE_SUBAGENT_MODEL": small_model,
+    }
 
     if args.server:
+        env_str = " \\\n".join(f"{k}={v}" for k, v in anthropic_env.items())
+        print(f"Connect with:\n{env_str} \\\nclaude\n")
         uvicorn.run(app, port=args.port)
     else:
         threading.Thread(target=lambda: uvicorn.run(app, port=args.port, log_level="critical"), daemon=True).start()
-        subprocess.run(["claude"], env={"ANTHROPIC_BASE_URL": f"http://localhost:{args.port}/", **os.environ})
+        subprocess.run(["claude"], env={**os.environ, **anthropic_env})
