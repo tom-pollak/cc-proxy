@@ -184,19 +184,22 @@ def mk_app(max_tokens: int | None, url: str, api_key: str) -> FastAPI:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Claude Code Proxy")
+    parser = argparse.ArgumentParser(
+        description="Chameleon Code - Use any AI model with Claude Code",
+        formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30)
+    )
     parser.add_argument("--model", "-m", default="deepseek/deepseek-chat-v3.1:free", help="Model to use")
     parser.add_argument("--small-model", help="Small model for haiku/subagent tasks (defaults to --model)")
-    parser.add_argument("--max-tokens", type=int)
-    parser.add_argument("--url", default="https://openrouter.ai/api/v1", help="URL to route to")
-    parser.add_argument("--api-key", default=os.getenv("CC_TOKEN"), help="API key (or set CC_TOKEN env var)")
-    parser.add_argument("--server", action="store_true", help="Run server only")
+    parser.add_argument("--max-tokens", type=int, help="Maximum tokens per request")
+    parser.add_argument("--url", default="https://openrouter.ai/api/v1", help="API URL to route to (defaults to OpenRouter)")
+    parser.add_argument("--api-key", default=os.getenv("CHAM_API_KEY"), help="API key (or set CHAM_API_KEY env var)")
+    parser.add_argument("--server", action="store_true", help="Run server only, connect externally")
     parser.add_argument("--port", type=int, default=8654, help="Port to bind to")
     args = parser.parse_args()
     small_model = args.small_model or args.model
 
     if not args.api_key:
-        parser.error("--api-key is required (or set CC_TOKEN environment variable)")
+        parser.error("--api-key is required (or set CHAM_API_KEY environment variable)")
 
     app = mk_app(args.max_tokens, args.url, args.api_key)
 
