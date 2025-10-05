@@ -161,6 +161,7 @@ class MessageResponse(BaseModel):
 
 # ███████████████████████████████████  Server  ███████████████████████████████████
 
+
 def mk_app(model: str, max_tokens: int | None, url: str, api_key: str) -> FastAPI:
     app = FastAPI()
     client = OpenAI(base_url=url, api_key=api_key)
@@ -186,10 +187,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Claude Code Proxy")
     parser.add_argument("--model", default="moonshotai/Kimi-K2-Instruct-0905:groq", help="Model to use")
     parser.add_argument("--max-tokens", type=int)
-    parser.add_argument("--url", default="https://router.huggingface.co/v1", help="URL to route to")
+    parser.add_argument("--url", default="https://openrouter.ai/api/v1", help="URL to route to")
     parser.add_argument("--api-key", default=os.getenv("CC_TOKEN"), help="API key (or set CC_TOKEN env var)")
+    parser.add_argument("--server", action="store_true", help="Run server only")
     parser.add_argument("--port", type=int, default=8654, help="Port to bind to")
-    parser.add_argument("--background", action="store_true", help="Run proxy in background and launch Claude Code")
     args = parser.parse_args()
 
     if not args.api_key:
@@ -197,8 +198,8 @@ if __name__ == "__main__":
 
     app = mk_app(args.model, args.max_tokens, args.url, args.api_key)
 
-    if args.background:
+    if args.server:
+        uvicorn.run(app, port=args.port)
+    else:
         threading.Thread(target=lambda: uvicorn.run(app, port=args.port, log_level="critical"), daemon=True).start()
         subprocess.run(["claude"], env={"ANTHROPIC_BASE_URL": f"http://localhost:{args.port}/", **os.environ})
-    else:
-        uvicorn.run(app, port=args.port)
