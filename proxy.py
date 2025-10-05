@@ -185,7 +185,7 @@ def mk_app(model: str, max_tokens: int | None, url: str, api_key: str) -> FastAP
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Claude Code Proxy")
-    parser.add_argument("--model", default="moonshotai/Kimi-K2-Instruct-0905:groq", help="Model to use")
+    parser.add_argument("--model", default="deepseek/deepseek-chat-v3.1:free", help="Model to use")
     parser.add_argument("--max-tokens", type=int)
     parser.add_argument("--url", default="https://openrouter.ai/api/v1", help="URL to route to")
     parser.add_argument("--api-key", default=os.getenv("CC_TOKEN"), help="API key (or set CC_TOKEN env var)")
