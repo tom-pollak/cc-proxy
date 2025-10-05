@@ -9,7 +9,8 @@ Claude Chameleon is a proxy that translates Claude Code requests to any AI model
 ## Quick Start
 
 ```bash
-CHAM_API_KEY="<YOUR_OPENROUTER_API_KEY>" ./cham.py
+uv tool install chameleon-code
+CHAM_API_KEY="<YOUR_OPENROUTER_API_KEY>" cham
 ```
 
 ## Options
@@ -28,11 +29,11 @@ CHAM_API_KEY="<YOUR_OPENROUTER_API_KEY>" ./cham.py
 
 ```bash
 # Use with OpenRouter (default)
-CHAM_API_KEY="sk-or-v1-..." ./cham.py --model deepseek/deepseek-chat
+CHAM_API_KEY="sk-or-v1-..." cham --model deepseek/deepseek-chat
 
 # Use with different API
-CHAM_API_KEY="sk-..." ./cham.py --url https://api.openai.com/v1 --model gpt-4
+CHAM_API_KEY="sk-..." cham --url https://api.openai.com/v1 --model gpt-4
 
 # Run server on custom port
-CHAM_API_KEY="sk-..." ./cham.py --server --port 8080
+CHAM_API_KEY="sk-..." cham --server --port 8080
 ```
