@@ -13,14 +13,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import uuid
 from typing import Any, Literal
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
+
+logger = logging.getLogger("uvicorn.error")
 
 
 class ToolCall(BaseModel):
@@ -163,7 +166,11 @@ def mk_app(model: str, max_tokens: int | None, url: str, api_key: str) -> FastAP
     @app.post("/v1/messages")
     async def messages(request: MessageRequest) -> MessageResponse:
         payload = request.to_openai(model, max_tokens)
-        completion = client.chat.completions.create(**payload)
+        try:
+            completion = client.chat.completions.create(**payload)
+        except Exception as e:
+            logger.error(f"Error calling {model}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
         return MessageResponse.from_completion(completion)
 
     @app.get("/health")
