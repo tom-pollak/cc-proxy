@@ -183,7 +183,7 @@ def mk_app(max_tokens: int | None, url: str, api_key: str) -> FastAPI:
     return app
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description="Chameleon Code - Use any AI model with Claude Code",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30)
@@ -218,3 +218,7 @@ if __name__ == "__main__":
     else:
         threading.Thread(target=lambda: uvicorn.run(app, port=args.port, log_level="critical"), daemon=True).start()
         subprocess.run(["claude"], env={**os.environ, **anthropic_env})
+
+
+if __name__ == "__main__":
+    main()

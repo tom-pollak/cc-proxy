@@ -11,3 +11,6 @@ dependencies = [
     "pydantic>=2.11.10",
     "uvicorn>=0.37.0",
 ]
+
+[project.scripts]
+cham = "cam:main"
