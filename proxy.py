@@ -15,6 +15,8 @@ import argparse
 import json
 import logging
 import os
+import subprocess
+import threading
 import uuid
 from typing import Any, Literal
 
@@ -137,7 +139,7 @@ class MessageResponse(BaseModel):
                 blocks.append(
                     ToolCall(type="tool_use", id=call.id, name=call.function.name, input=json.loads(call.function.arguments or "{}"))
                 )
-            stop_reason: Literal["tool_use", "end_turn"] = "tool_use"
+            stop_reason = "tool_use"
         else:
             blocks.append(Content(type="text", text=msg.content or ""))
             stop_reason = "end_turn"
@@ -187,10 +189,16 @@ if __name__ == "__main__":
     parser.add_argument("--url", default="https://router.huggingface.co/v1", help="URL to route to")
     parser.add_argument("--api-key", default=os.getenv("CC_TOKEN"), help="API key (or set CC_TOKEN env var)")
     parser.add_argument("--port", type=int, default=8654, help="Port to bind to")
+    parser.add_argument("--background", action="store_true", help="Run proxy in background and launch Claude Code")
     args = parser.parse_args()
 
     if not args.api_key:
         parser.error("--api-key is required (or set CC_TOKEN environment variable)")
 
     app = mk_app(args.model, args.max_tokens, args.url, args.api_key)
-    uvicorn.run(app, port=args.port)
+
+    if args.background:
+        threading.Thread(target=lambda: uvicorn.run(app, port=args.port, log_level="critical"), daemon=True).start()
+        subprocess.run(["claude"], env={"ANTHROPIC_BASE_URL": f"http://localhost:{args.port}/", **os.environ})
+    else:
+        uvicorn.run(app, port=args.port)
