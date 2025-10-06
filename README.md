@@ -10,7 +10,7 @@ Chameleon Code is a proxy that translates Claude Code requests to any AI model. 
 
 ```bash
 uv tool install chameleon-code
-CHAM_API_KEY="<YOUR_OPENROUTER_API_KEY>" cham
+OPENROUTER_API_KEY="<YOUR_OPENROUTER_API_KEY>" cham
 ```
 
 Or run standalone (it's single Python file, requires `uv`):
@@ -26,7 +26,7 @@ Or run standalone (it's single Python file, requires `uv`):
 --small-model SMALL_MODEL      Small model for haiku/subagent tasks (defaults to --model)
 --max-tokens MAX_TOKENS        Maximum tokens per request
 --url URL                      API URL to route to (defaults to OpenRouter)
---api-key API_KEY              API key (or set CHAM_API_KEY env var)
+--api-key API_KEY              API key (or set OPENROUTER_API_KEY env var)
 --server                       Run server only, connect externally
 --port PORT                    Port to bind to
 ```
@@ -35,11 +35,11 @@ Or run standalone (it's single Python file, requires `uv`):
 
 ```bash
 # Use with OpenRouter (default)
-CHAM_API_KEY="sk-or-v1-..." cham --model deepseek/deepseek-chat
+OPENROUTER_API_KEY="sk-or-v1-..." cham --model deepseek/deepseek-chat
 
 # Use with different API
-CHAM_API_KEY="sk-..." cham --url https://api.openai.com/v1 --model gpt-4
+OPENROUTER_API_KEY="sk-..." cham --url https://api.openai.com/v1 --model gpt-4
 
 # Run server on custom port
-CHAM_API_KEY="sk-..." cham --server --port 8080
+OPENROUTER_API_KEY="sk-..." cham --server --port 8080
 ```

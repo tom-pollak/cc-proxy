@@ -191,14 +191,14 @@ def main():
     parser.add_argument("--small-model", help="Small model for haiku/subagent tasks (defaults to --model)")
     parser.add_argument("--max-tokens", type=int, help="Maximum tokens per request")
     parser.add_argument("--url", default="https://openrouter.ai/api/v1", help="API URL to route to (defaults to OpenRouter)")
-    parser.add_argument("--api-key", default=os.getenv("CHAM_API_KEY"), help="API key (or set CHAM_API_KEY env var)")
+    parser.add_argument("--api-key", default=os.getenv("OPENROUTER_API_KEY"), help="API key (or set OPENROUTER_API_KEY env var)")
     parser.add_argument("--server", action="store_true", help="Run server only, connect externally")
     parser.add_argument("--port", type=int, default=8654, help="Port to bind to")
 
     args = parser.parse_args()
     small_model = args.small_model or args.model
     if not args.api_key:
-        parser.error("--api-key is required (or set CHAM_API_KEY environment variable)")
+        parser.error("--api-key is required (or set OPENROUTER_API_KEY environment variable)")
 
     app = mk_app(args.max_tokens, args.url, args.api_key)
 
